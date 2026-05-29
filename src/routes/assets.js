@@ -1,5 +1,6 @@
-import { Router } from 'express';
-import { listAssets, addAsset, deleteAsset, latestPriceFor } from '../store.js';
+import { Router } from "express";
+import { listAssets, addAsset, deleteAsset, latestPriceFor } from "../store.js";
+import { getUsdToVnd } from "../exchange.js";
 
 const router = Router();
 
@@ -7,7 +8,10 @@ const router = Router();
 function value(asset) {
   const price = latestPriceFor(asset.source, asset.product);
   const cost = asset.quantity * asset.buyPrice;
-  let currentUnit = null, currentValue = null, pl = null, plPct = null;
+  let currentUnit = null,
+    currentValue = null,
+    pl = null,
+    plPct = null;
   if (price && price.buy != null) {
     currentUnit = price.buy;
     currentValue = asset.quantity * price.buy;
@@ -21,14 +25,22 @@ function value(asset) {
     currentValue,
     profitLoss: pl,
     profitLossPct: plPct,
-    priceAt: price ? price.fetchedAt : null
+    priceAt: price ? price.fetchedAt : null,
   };
 }
 
-router.get('/assets', (_req, res) => {
+router.get("/assets", async (_req, res) => {
+  const usdToVnd = await getUsdToVnd();
   const assets = listAssets().map(value);
   const totals = assets.reduce(
     (t, a) => {
+      if (a.type == "crypto") {
+        a.cost *= usdToVnd;
+        if (a.currentValue != null) {
+          a.currentValue *= usdToVnd;
+        }
+      }
+
       t.cost += a.cost;
       if (a.currentValue != null) {
         t.currentValue += a.currentValue;
@@ -36,26 +48,29 @@ router.get('/assets', (_req, res) => {
       }
       return t;
     },
-    { cost: 0, currentValue: 0, valued: 0 }
+    { cost: 0, currentValue: 0, valued: 0 },
   );
   totals.profitLoss = totals.currentValue - totals.valued;
-  totals.profitLossPct = totals.valued > 0 ? (totals.profitLoss / totals.valued) * 100 : null;
+  totals.profitLossPct =
+    totals.valued > 0 ? (totals.profitLoss / totals.valued) * 100 : null;
   res.json({ assets, totals });
 });
 
-router.post('/assets', (req, res) => {
+router.post("/assets", (req, res) => {
   const b = req.body || {};
   if (!b.type || !b.quantity || !b.buyPrice) {
-    return res.status(400).json({ error: 'Can co type, quantity, buyPrice' });
+    return res.status(400).json({ error: "Can co type, quantity, buyPrice" });
   }
-  if (!['gold', 'silver', 'crypto'].includes(b.type)) {
-    return res.status(400).json({ error: 'type phai la gold, silver hoac crypto' });
+  if (!["gold", "silver", "crypto"].includes(b.type)) {
+    return res
+      .status(400)
+      .json({ error: "type phai la gold, silver hoac crypto" });
   }
   const asset = addAsset(b);
   res.status(201).json(value(asset));
 });
 
-router.delete('/assets/:id', (req, res) => {
+router.delete("/assets/:id", (req, res) => {
   const ok = deleteAsset(req.params.id);
   res.status(ok ? 200 : 404).json({ ok });
 });

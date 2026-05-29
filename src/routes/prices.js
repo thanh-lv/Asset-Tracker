@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { latestPrices, priceHistory, lastUpdated } from '../store.js';
 import { crawlAll } from '../crawlers/index.js';
+import { getUsdToVnd } from '../exchange.js';
 
 const router = Router();
 
@@ -31,10 +32,13 @@ router.post('/crawl', async (_req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+
 // Config public cho frontend (chi nhung key an toan)
-router.get('/config', (_req, res) => {
+router.get('/config', async (_req, res) => {
+  const usdToVnd = await getUsdToVnd();
   res.json({
-    cmcConvert: process.env.CMC_CONVERT || 'VND'
+    cmcConvert: process.env.CMC_CONVERT || 'VND',
+    usdToVnd
   });
 });
 
