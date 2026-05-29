@@ -352,3 +352,33 @@ loadConfig().then(() => {
   loadPrices();
   loadAssets();
 });
+
+// ---------- SSE: TU DONG CAP NHAT KHI CRON CRAWL XONG ----------
+(function connectSSE() {
+  const es = new EventSource("/api/events");
+
+  es.addEventListener("prices-updated", async (e) => {
+    console.log("[sse] nhan event prices-updated:", e.data);
+    await loadPrices();
+    await loadAssets();
+    showToast("Giá vừa được cập nhật tự động");
+  });
+
+  es.onerror = () => {
+    // EventSource tu dong reconnect (mac dinh ~3s), chi log
+    console.warn("[sse] mat ket noi, dang thu lai...");
+  };
+})();
+
+function showToast(msg) {
+  let el = document.getElementById("sse-toast");
+  if (!el) {
+    el = document.createElement("div");
+    el.id = "sse-toast";
+    document.body.appendChild(el);
+  }
+  el.textContent = msg;
+  el.classList.add("show");
+  clearTimeout(el._timer);
+  el._timer = setTimeout(() => el.classList.remove("show"), 3500);
+}

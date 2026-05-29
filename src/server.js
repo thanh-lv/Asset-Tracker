@@ -6,6 +6,7 @@ import cron from 'node-cron';
 import pricesRouter from './routes/prices.js';
 import assetsRouter from './routes/assets.js';
 import { crawlAll } from './crawlers/index.js';
+import { sseHandler, broadcast } from './sse.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
@@ -13,6 +14,7 @@ const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
 app.use(express.static(path.join(__dirname, '..', 'public')));
+app.get('/api/events', sseHandler);
 app.use('/api', pricesRouter);
 app.use('/api', assetsRouter);
 
@@ -30,6 +32,7 @@ cron.schedule(schedule, async () => {
     const r = await crawlAll();
     console.log(`[cron] crawl xong: luu ${r.saved} dong`,
       r.sources.map(s => `${s.source}:${s.ok ? s.count : 'LOI'}`).join(' '));
+    broadcast('prices-updated', { saved: r.saved, at: r.at });
   } catch (e) {
     console.error('[cron] crawl loi:', e.message);
   }
@@ -41,6 +44,7 @@ setTimeout(async () => {
     const r = await crawlAll();
     console.log(`[init] crawl xong: luu ${r.saved} dong`,
       r.sources.map(s => `${s.source}:${s.ok ? s.count : 'LOI'}`).join(' '));
+    broadcast('prices-updated', { saved: r.saved, at: r.at });
   } catch (e) {
     console.error('[init] crawl loi:', e.message);
   }
