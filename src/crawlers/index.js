@@ -3,8 +3,9 @@ import { savePrices } from '../store.js';
 import * as phuquy from './phuquy.js';
 import * as ancarat from './ancarat.js';
 import * as btmh from './btmh.js';
+import * as crypto from './crypto.js';
 
-const SOURCES = [btmh, phuquy, ancarat];
+const SOURCES = [btmh, phuquy, ancarat, crypto];
 
 export async function crawlAll() {
   const summary = [];
@@ -17,7 +18,6 @@ export async function crawlAll() {
         allRows = allRows.concat(rows);
         summary.push({ source: mod.SOURCE, ok: true, count: rows.length });
       } catch (err) {
-        console.log(err);
         summary.push({ source: mod.SOURCE, ok: false, error: err.message });
       }
     })

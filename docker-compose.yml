@@ -3,11 +3,13 @@ services:
     build: .
     container_name: asset-tracker
     ports:
-      - "3000:3000"          # host:container -> mo http://localhost:3000
+      - "3000:3000"  # chi nghe tren localhost -> tren EC2 truy cap qua SSH tunnel
     volumes:
       - ./data:/app/data     # giu db.json (lich su gia + tai san) tren may host
     environment:
       - PORT=3000
-      - CRON_SCHEDULE=*/30 * * * *   # lich crawl, doi neu muon (vd "0 * * * *" = moi gio)
-      # - BTMH_URL=...               # bo comment + sua neu can chinh nguon BTMH
+      - CRON_SCHEDULE=${CRON_SCHEDULE:-*/30 * * * *}
+      - CMC_API_KEY=${CMC_API_KEY:-}          # key free tu pro.coinmarketcap.com (cho BTC/ETH)
+      - CMC_CONVERT=${CMC_CONVERT:-VND}        # dong tien quy doi: VND, USD, ...
+      - BTMH_CODE=${BTMH_CODE:-KGB}           # ma san pham vang BTMH
     restart: unless-stopped

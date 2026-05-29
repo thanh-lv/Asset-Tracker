@@ -51,6 +51,10 @@ docker compose up -d --build    # build lại sau khi sửa code
 
 Đổi cổng hoặc lịch crawl: sửa `docker-compose.yml` (mục `ports` và `CRON_SCHEDULE`).
 
+Đặt secret (vd `CMC_API_KEY`): tạo file `.env` từ template `.env.example`, sửa giá trị thật. File `.env` đã trong `.gitignore`.
+
+Deploy lên AWS EC2 (Ubuntu) + pull từ GitHub: xem **[DEPLOY.md](./DEPLOY.md)**.
+
 Nếu không dùng Compose:
 
 ```bash
@@ -64,6 +68,8 @@ docker run -d -p 3000:3000 -v "$(pwd)/data:/app/data" --name asset-tracker asset
 
 - `PORT` — cổng web, mặc định `3000`.
 - `CRON_SCHEDULE` — lịch crawl, mặc định `*/30 * * * *` (30 phút/lần).
+- `CMC_API_KEY` — API key CoinMarketCap (free) để lấy giá BTC/ETH. Không có thì các nguồn vàng/bạc vẫn chạy.
+- `BTMH_CODE` — mã sản phẩm vàng BTMH, mặc định `KGB`.
 - `BTMH_URL` — URL nguồn giá BTMH (xem phần dưới).
 
 Ví dụ: `PORT=8080 CRON_SCHEDULE="0 * * * *" npm start`
@@ -87,12 +93,14 @@ Chỉ lấy **bạc 1 lượng** từ Phú Quý và Ancarat (bỏ 5 lượng, ki
 | Phú Quý | Bạc  | API JSON `be.phuquy.com.vn/.../api/products/get-price` (item `id=B`) | Chạy sẵn           |
 | Ancarat | Bạc  | API JSON `giabac.ancarat.com/api/price-data` (lọc loại 1 lượng)      | Chạy sẵn           |
 | BTMH    | Vàng | GraphQL `baotinmanhhai.vn/api/graphql` (`GetGoldRates`, code `KGB`)   | Chạy sẵn           |
+| CMC     | Crypto | CoinMarketCap `pro-api.coinmarketcap.com` (BTC, ETH theo VND)      | Cần API key (free) |
 
 Ghi chú:
 
 - Phú Quý: trang `phuquy.com.vn/bang-gia/bac` là SPA, nên dùng API backend. `priceBuyTael`/`priceSellTael` là giá theo lượng → giá bạc 1 lượng.
 - Ancarat: dùng API `giabac.ancarat.com/api/price-data` (mảng `[tên, bán_ra, mua_vào, mã, url, ẩn/hiện]`). App lấy **tất cả sản phẩm bạc loại 1 lượng đang hiển thị** (`ẩn/hiện = "1"`), bỏ 5 lượng/kilo/gram/chỉ, bỏ vàng tham khảo. Khi thêm tài sản bạn chọn đúng thỏi mình đang giữ trong danh sách. Muốn rút gọn về 1 sản phẩm: sửa hàm `parseAncaratPrice` trong `src/crawlers/ancarat.js`.
 - BTMH: POST GraphQL query `GetGoldRates` tới `baotinmanhhai.vn/api/graphql`, lấy item có `code = "KGB"` (Nhẫn Tròn ép vỉ Kim Gia Bảo 24K 999.9). `buy_price` = mua vào, `sell_price` = bán ra. Muốn đổi sản phẩm khác: set biến môi trường `BTMH_CODE` (vd `BTMH_CODE=SJC`) hoặc sửa hằng `WANT_CODE` trong `src/crawlers/btmh.js`.
+- CMC (BTC/ETH): cần API key free. Đăng ký tại `pro.coinmarketcap.com` → lấy key → đặt biến môi trường `CMC_API_KEY`. Lấy giá BTC, ETH theo VND kèm % thay đổi 24h. Crypto không có chênh lệch mua/bán nên `mua = bán = giá thị trường`; lãi/lỗ = giá hiện tại − giá bạn đã mua. Chưa set key thì các nguồn vàng/bạc vẫn chạy bình thường, chỉ riêng crypto báo thiếu key. Thêm coin khác: sửa mảng `COINS` trong `src/crawlers/crypto.js`.
 
 ## Đổi sản phẩm / nguồn BTMH
 

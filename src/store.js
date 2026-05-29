@@ -46,11 +46,13 @@ export function savePrices(rows) {
     db.prices.push({
       id: db.seq.price,
       source: r.source,
-      type: r.type,            // 'gold' | 'silver'
+      type: r.type,            // 'gold' | 'silver' | 'crypto'
       product: r.product,
       unit: r.unit || '',
       buy: r.buy ?? null,      // gia mua vao (dealer mua tu ban => so tien ban nhan khi ban ra)
       sell: r.sell ?? null,    // gia ban ra (dealer ban cho ban => so tien ban tra khi mua)
+      usd: r.usd ?? null,        // (crypto) gia USD - chi de hien thi
+      change24h: r.change24h ?? null, // (crypto) % thay doi 24h
       fetchedAt
     });
   }

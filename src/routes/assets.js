@@ -38,7 +38,6 @@ router.get('/assets', (_req, res) => {
     },
     { cost: 0, currentValue: 0, valued: 0 }
   );
-
   totals.profitLoss = totals.currentValue - totals.valued;
   totals.profitLossPct = totals.valued > 0 ? (totals.profitLoss / totals.valued) * 100 : null;
   res.json({ assets, totals });
@@ -49,8 +48,8 @@ router.post('/assets', (req, res) => {
   if (!b.type || !b.quantity || !b.buyPrice) {
     return res.status(400).json({ error: 'Can co type, quantity, buyPrice' });
   }
-  if (!['gold', 'silver'].includes(b.type)) {
-    return res.status(400).json({ error: 'type phai la gold hoac silver' });
+  if (!['gold', 'silver', 'crypto'].includes(b.type)) {
+    return res.status(400).json({ error: 'type phai la gold, silver hoac crypto' });
   }
   const asset = addAsset(b);
   res.status(201).json(value(asset));

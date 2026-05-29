@@ -14,10 +14,11 @@ COPY public ./public
 # Thu muc luu du lieu (se duoc mount volume de giu lich su gia + tai san)
 RUN mkdir -p data
 
-ENV PORT=3000
 # baotinmanhhai.vn gui thieu intermediate cert -> Alpine khong verify duoc.
 # Chi anh huong crawler, chap nhan duoc cho muc dich nay.
 ENV NODE_TLS_REJECT_UNAUTHORIZED=0
+
+ENV PORT=3000
 EXPOSE 3000
 
-CMD ["node", "src/server.js"]
+CMD ["npm", "start"]

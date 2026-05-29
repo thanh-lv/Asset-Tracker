@@ -1,6 +1,8 @@
-node_modules/
+node_modules
+npm-debug.log
 data/db.json
 data/db.json.tmp
 *.log
-.env
+.git
+.gitignore
 .DS_Store

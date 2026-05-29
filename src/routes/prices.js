@@ -26,13 +26,16 @@ router.get('/prices/history', (req, res) => {
 router.post('/crawl', async (_req, res) => {
   try {
     const result = await crawlAll();
-    console.log(`[manual] crawl xong: luu ${result.saved} dong`,
-      result.sources.map(s => `${s.source}:${s.ok ? s.count : 'LOI'}`).join(' '));
     res.json(result);
   } catch (err) {
-    console.error('[manual] crawl loi:', err.message);
     res.status(500).json({ error: err.message });
   }
+});
+// Config public cho frontend (chi nhung key an toan)
+router.get('/config', (_req, res) => {
+  res.json({
+    cmcConvert: process.env.CMC_CONVERT || 'VND'
+  });
 });
 
 export default router;

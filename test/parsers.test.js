@@ -94,3 +94,31 @@ test('BTMH: xu ly buy_price dang chuoi co dau phay', () => {
   assert.equal(rows[0].buy, 15400000);
   assert.equal(rows[0].sell, 15650000);
 });
+
+// CoinMarketCap quotes/latest -> BTC & ETH theo VND
+import { parseCmc } from '../src/crawlers/crypto.js';
+const CMC_JSON = {
+  status: { error_code: 0 },
+  data: {
+    BTC: { symbol:'BTC', name:'Bitcoin', quote: { VND: { price: 2700000000.5, percent_change_24h: 1.234 } } },
+    ETH: { symbol:'ETH', name:'Ethereum', quote: { VND: { price: 90000000.0, percent_change_24h: -2.5 } } }
+  }
+};
+test('CMC: parse BTC & ETH theo VND', () => {
+  const rows = parseCmc(CMC_JSON, 'VND');
+  assert.equal(rows.length, 2);
+  const btc = rows.find(r => r.product.includes('BTC'));
+  assert.equal(btc.buy, 2700000001);   // lam tron
+  assert.equal(btc.sell, btc.buy);      // crypto: mua = ban
+  assert.equal(btc.unit, 'coin');
+  assert.equal(Math.round(btc.change24h * 100) / 100, 1.23);
+  const eth = rows.find(r => r.product.includes('ETH'));
+  assert.equal(eth.buy, 90000000);
+  assert.equal(eth.change24h, -2.5);
+});
+test('CMC: chiu duoc data[symbol] dang mang', () => {
+  const j = { data: { BTC: [{ quote: { VND: { price: 100, percent_change_24h: 0 } } }] } };
+  const rows = parseCmc(j, 'VND');
+  assert.equal(rows.length, 1);
+  assert.equal(rows[0].buy, 100);
+});

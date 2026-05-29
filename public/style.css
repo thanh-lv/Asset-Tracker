@@ -99,6 +99,7 @@ table.data tbody tr:hover { background: #1b1e24; }
 .tag { font-size: 11px; padding: 2px 8px; border-radius: 20px; font-weight: 600; }
 .tag.gold { color: var(--gold-soft); background: rgba(217,164,65,.12); border: 1px solid rgba(217,164,65,.3); }
 .tag.silver { color: var(--silver); background: rgba(199,204,212,.1); border: 1px solid rgba(199,204,212,.25); }
+.tag.crypto { color: #6fd3c7; background: rgba(111,211,199,.1); border: 1px solid rgba(111,211,199,.3); }
 
 .up { color: var(--up); }
 .down { color: var(--down); }
