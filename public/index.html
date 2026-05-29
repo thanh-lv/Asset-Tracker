@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Theo dõi tài sản Vàng &amp; Bạc</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+  <div class="grain"></div>
+
+  <header class="topbar">
+    <div class="brand">
+      <span class="dot"></span>
+      <h1>Vàng &amp; Bạc <em>Tracker</em></h1>
+    </div>
+    <div class="topbar-right">
+      <span id="updated" class="updated">—</span>
+      <button id="refresh" class="btn">Cập nhật giá</button>
+    </div>
+  </header>
+
+  <main>
+    <!-- TONG QUAN DANH MUC -->
+    <section class="summary">
+      <div class="card stat">
+        <span class="label">Vốn bỏ ra</span>
+        <span class="value" id="t-cost">—</span>
+      </div>
+      <div class="card stat">
+        <span class="label">Giá trị hiện tại</span>
+        <span class="value" id="t-value">—</span>
+        <small class="hint">tính theo giá mua vào (giá bán lại)</small>
+      </div>
+      <div class="card stat">
+        <span class="label">Lãi / Lỗ</span>
+        <span class="value" id="t-pl">—</span>
+        <span class="pct" id="t-pct"></span>
+      </div>
+    </section>
+
+    <!-- TAI SAN -->
+    <section class="block">
+      <div class="block-head">
+        <h2>Tài sản của tôi</h2>
+        <button id="toggle-form" class="btn ghost">+ Thêm tài sản</button>
+      </div>
+
+      <form id="asset-form" class="asset-form hidden">
+        <div class="row">
+          <label>Loại
+            <select name="type" id="f-type" required>
+              <option value="gold">Vàng</option>
+              <option value="silver" selected>Bạc</option>
+            </select>
+          </label>
+          <label>Nguồn giá
+            <select name="source" id="f-source"></select>
+          </label>
+        </div>
+        <label>Sản phẩm (khớp bảng giá để định giá tự động)
+          <select name="product" id="f-product"></select>
+        </label>
+        <div class="row">
+          <label>Số lượng
+            <input type="number" name="quantity" id="f-qty" step="any" min="0" placeholder="vd: 2" required />
+          </label>
+          <label>Đơn vị
+            <input type="text" name="unit" id="f-unit" placeholder="lượng / chỉ / gram" />
+          </label>
+        </div>
+        <div class="row">
+          <label>Giá mua / đơn vị (đ)
+            <input type="number" name="buyPrice" id="f-price" step="any" min="0" placeholder="vd: 2853000" required />
+          </label>
+          <label>Ngày mua
+            <input type="date" name="buyDate" id="f-date" />
+          </label>
+        </div>
+        <label>Ghi chú
+          <input type="text" name="note" id="f-note" placeholder="tuỳ chọn" />
+        </label>
+        <div class="form-actions">
+          <button type="submit" class="btn">Lưu</button>
+          <button type="button" id="cancel-form" class="btn ghost">Huỷ</button>
+        </div>
+      </form>
+
+      <div class="table-wrap">
+        <table id="assets-table" class="data">
+          <thead>
+            <tr>
+              <th>Loại</th><th>Sản phẩm</th><th class="num">SL</th>
+              <th class="num">Giá mua</th><th class="num">Vốn</th>
+              <th class="num">Giá hiện tại</th><th class="num">Giá trị</th>
+              <th class="num">Lãi/Lỗ</th><th></th>
+            </tr>
+          </thead>
+          <tbody id="assets-body"></tbody>
+          <tfoot id="assets-foot"></tfoot>
+        </table>
+        <p id="assets-empty" class="empty">Chưa có tài sản nào. Bấm "Thêm tài sản" để bắt đầu.</p>
+      </div>
+    </section>
+
+    <!-- BANG GIA -->
+    <section class="block">
+      <div class="block-head"><h2>Bảng giá hôm nay</h2></div>
+      <div id="price-groups" class="price-groups"></div>
+    </section>
+
+    <!-- BIEU DO -->
+    <section class="block" id="chart-block" style="display:none">
+      <div class="block-head">
+        <h2 id="chart-title">Biểu đồ giá</h2>
+        <button id="chart-close" class="btn ghost">Đóng</button>
+      </div>
+      <canvas id="chart" height="220"></canvas>
+    </section>
+  </main>
+
+  <footer>
+    <span>Dữ liệu chỉ để tham khảo. Nguồn: Bảo Tín Mạnh Hải, Phú Quý, Ancarat.</span>
+  </footer>
+
+  <script src="/app.js"></script>
+</body>
+</html>

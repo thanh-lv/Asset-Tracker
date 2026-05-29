@@ -1,0 +1,13 @@
+services:
+  asset-tracker:
+    build: .
+    container_name: asset-tracker
+    ports:
+      - "3000:3000"          # host:container -> mo http://localhost:3000
+    volumes:
+      - ./data:/app/data     # giu db.json (lich su gia + tai san) tren may host
+    environment:
+      - PORT=3000
+      - CRON_SCHEDULE=*/30 * * * *   # lich crawl, doi neu muon (vd "0 * * * *" = moi gio)
+      # - BTMH_URL=...               # bo comment + sua neu can chinh nguon BTMH
+    restart: unless-stopped
