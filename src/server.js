@@ -23,10 +23,16 @@ app.listen(PORT, () => {
 // Lich crawl tu dong. Mac dinh moi 30 phut. Doi qua CRON_SCHEDULE neu muon.
 // Giu tan suat thap de lich su voi server cua cac thuong hieu.
 const schedule = process.env.CRON_SCHEDULE || '*/30 * * * *';
+console.log(`[cron] da dang ky lich crawl: "${schedule}"`);
 cron.schedule(schedule, async () => {
-  const r = await crawlAll();
-  console.log(`[cron] crawl xong: luu ${r.saved} dong`,
-    r.sources.map(s => `${s.source}:${s.ok ? s.count : 'LOI'}`).join(' '));
+  try {
+    console.log('[cron] bat dau crawl...');
+    const r = await crawlAll();
+    console.log(`[cron] crawl xong: luu ${r.saved} dong`,
+      r.sources.map(s => `${s.source}:${s.ok ? s.count : 'LOI'}`).join(' '));
+  } catch (e) {
+    console.error('[cron] crawl loi:', e.message);
+  }
 });
 
 // Crawl 1 lan ngay khi khoi dong (sau 2s) de co du lieu ban dau.
